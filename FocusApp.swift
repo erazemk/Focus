@@ -117,6 +117,8 @@ final class FocusTimer: ObservableObject {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private let distributedNotificationCenter = DistributedNotificationCenter.default()
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         HotKeyManager.shared.onToggle = {
             Task { @MainActor in
@@ -124,6 +126,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         HotKeyManager.shared.register()
+
+        distributedNotificationCenter.addObserver(
+            self,
+            selector: #selector(handleScreenLocked(_:)),
+            name: Notification.Name(rawValue: "com.apple.screenIsLocked"),
+            object: nil
+        )
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        distributedNotificationCenter.removeObserver(
+            self,
+            name: Notification.Name(rawValue: "com.apple.screenIsLocked"),
+            object: nil
+        )
+        HotKeyManager.shared.unregister()
+    }
+
+    @objc private func handleScreenLocked(_ notification: Notification) {
+        Task { @MainActor in
+            guard FocusTimer.shared.isRunning else { return }
+            FocusTimer.shared.stop()
+        }
     }
 }
 
