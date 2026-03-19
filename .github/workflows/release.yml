@@ -8,6 +8,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     uses: erazemk/macOS/.github/workflows/release.yml@main
     with:
       app_name: Focus
