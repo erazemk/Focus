@@ -44,11 +44,12 @@
 - Automatically stopped if the screen is locked
 
 ## Packaging (Terminal-First)
-- SwiftPM project with a single `FocusApp.swift` at repo root.
-- Build with `make`:
-  - `swift build -c release`
-  - Assemble `.app` inside `.build/Focus.app`
-  - Copy to `~/Applications/Focus.app`
+- Always build this project via the `Makefile`; do not invoke `swift build` directly.
+- Only use `make build`. Do not run `make install` unless the user explicitly asks.
+- SwiftPM project rooted at `src/`.
+- `make build` will:
+  - run `swift build --package-path src --scratch-path .build -c release`
+  - assemble `.app` inside `.build/Focus.app`
 - App icon:
   - `AppIcon.icns` is used via `CFBundleIconFile`.
   - Copied into `.app/Contents/Resources/`.
