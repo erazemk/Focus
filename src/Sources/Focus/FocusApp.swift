@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import ServiceManagement
 import SwiftUI
 
 @main
@@ -120,6 +121,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let distributedNotificationCenter = DistributedNotificationCenter.default()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        setupLaunchAtLogin()
+
         HotKeyManager.shared.onToggle = {
             Task { @MainActor in
                 FocusTimer.shared.toggle()
@@ -133,6 +136,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             name: Notification.Name(rawValue: "com.apple.screenIsLocked"),
             object: nil
         )
+    }
+
+    private func setupLaunchAtLogin() {
+        let service = SMAppService.mainApp
+
+        if service.status != .enabled {
+            do {
+                try service.register()
+                NSLog("Launch at login enabled")
+            } catch {
+                NSLog("Failed to enable launch at login: \(error)")
+            }
+        } else {
+            NSLog("Launch at login already enabled")
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
