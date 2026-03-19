@@ -1,26 +1,54 @@
 # Focus — Agent Notes
 
-## Specification
-- `SPEC.md` is the primary source of truth for product behavior and user-facing requirements.
-- Consult `SPEC.md` before making implementation changes.
-- If a change affects user-facing behavior, packaging behavior, or any documented contract, update `SPEC.md` alongside the code.
-- Avoid duplicating feature details here; keep behavior documentation in `SPEC.md`.
+## App Summary
+- Native macOS menu bar app named **Focus**.
+- Counts focused time in seconds and can be started/stopped via a global shortcut.
+- Menu bar shows **only the elapsed time** (no icon, no app name).
 
-## Project Structure
-- `src/` is the SwiftPM package root.
-- `src/Package.swift` defines the package.
-- `src/Sources/Focus/FocusApp.swift` contains the app source.
-- `src/Bundle/Info.plist` contains app bundle metadata.
-- `src/Bundle/Resources/AppIcon.icns` contains the app icon asset.
-- `Makefile` contains the build and install workflows.
+## Platform & Tech
+- Language: Swift
+- UI: SwiftUI (menu bar only; no custom windows)
+- Libraries: AppKit, Carbon, ServiceManagement
+- Target: macOS 26
+- Bundle ID: `com.erazemk.Focus`
+- No Xcode UI; terminal-only workflow.
+- No code signing or distribution required (local `.app` only).
 
-## Build and Packaging
-- Build with `make build`.
-- Install locally with `make install`.
-- The underlying build command is: `swift build --package-path src --scratch-path .build -c release`
-- App bundle assembly output is: `.build/Focus.app`
-- Local install destination is: `~/Applications/Focus.app`
+## Menu Bar Behavior
+- Standard menu with:
+  - Start (Cmd+S)
+  - Stop (Cmd+S)
+  - Quit (Cmd+Q)
+- Start/Stop share Cmd+S:
+  - If stopped: Start enabled, Stop disabled, Cmd+S starts.
+  - If running: Stop enabled, Start disabled, Cmd+S stops.
+- Quit always enabled.
 
-## Workflow Notes
-- Use terminal-based workflow only; do not rely on Xcode project files or Xcode UI.
-- No code signing or distribution setup is required for local builds unless the task explicitly asks for it.
+## Global Shortcut
+- System-wide hotkey: `Ctrl + Option + F` toggles start/stop.
+- Use standard global hotkey registration approach (may prompt for permissions).
+
+## Launch at Login
+- App attempts to auto-enable launch at login on startup.
+- There is no UI for toggling this behavior.
+
+## Timer Rules
+- Display format:
+  - `1s..59s`
+  - `1m, 1m 1s .. 59m 59s`
+  - `1h, 1h 1s, 1h 59s, 1h 1m, ...`
+- Max: under 24 hours (no days).
+- Stopped state keeps last elapsed time visible.
+- Stopped → started resets to 0 and begins counting.
+- No persistence/history beyond the current session.
+- Automatically stopped if the screen is locked
+
+## Packaging (Terminal-First)
+- SwiftPM project with a single `FocusApp.swift` at repo root.
+- Build with `make`:
+  - `swift build -c release`
+  - Assemble `.app` inside `.build/Focus.app`
+  - Copy to `~/Applications/Focus.app`
+- App icon:
+  - `AppIcon.icns` is used via `CFBundleIconFile`.
+  - Copied into `.app/Contents/Resources/`.
