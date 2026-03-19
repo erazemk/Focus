@@ -7,20 +7,20 @@ INSTALL_DIR := $(HOME)/Applications
 BUNDLE_DIR := $(PACKAGE_DIR)/Bundle
 
 install: build
-	@if pgrep -x "$(APP_NAME)" >/dev/null; then \
-		killall "$(APP_NAME)"; \
-	fi
-	@if [ -d "$(INSTALL_DIR)/$(APP_BUNDLE)" ]; then \
-		trash "$(INSTALL_DIR)/$(APP_BUNDLE)"; \
-	fi
-	mkdir -p "$(INSTALL_DIR)"
-	cp -R "$(APP_DIR)" "$(INSTALL_DIR)/"
+	@was_running=0; \
+	if pgrep -x "$(APP_NAME)" >/dev/null; then \
+		was_running=1; killall "$(APP_NAME)"; \
+		while pgrep -x "$(APP_NAME)" >/dev/null; do sleep 0.1; done; \
+	fi; \
+	[ ! -d "$(INSTALL_DIR)/$(APP_BUNDLE)" ] || rm -rf "$(INSTALL_DIR)/$(APP_BUNDLE)"; \
+	mkdir -p "$(INSTALL_DIR)"; \
+	cp -R "$(APP_DIR)" "$(INSTALL_DIR)/"; \
+	[ "$$was_running" -ne 1 ] || open "$(INSTALL_DIR)/$(APP_BUNDLE)"
 .PHONY: install
 
 build:
 	swift build --package-path $(PACKAGE_DIR) --scratch-path $(BUILD_DIR) -c release
-	mkdir -p $(APP_DIR)/Contents/MacOS
-	mkdir -p $(APP_DIR)/Contents/Resources
+	mkdir -p $(APP_DIR)/Contents/MacOS $(APP_DIR)/Contents/Resources
 	cp $(BUILD_DIR)/release/$(APP_NAME) $(APP_DIR)/Contents/MacOS/$(APP_NAME)
 	cp $(BUNDLE_DIR)/Info.plist $(APP_DIR)/Contents/Info.plist
 	cp $(BUNDLE_DIR)/Resources/AppIcon.icns $(APP_DIR)/Contents/Resources/AppIcon.icns

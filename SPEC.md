@@ -2,9 +2,7 @@
 
 ## 1. Purpose
 
-This document defines **Focus** and serves as the primary source of truth for the product.
-
-Implementations, refactors, and future features conform to this specification. When functionality changes, this document changes with it so contributors and AI agents can rely on it as the authoritative description of the app.
+This document defines the functional behavior of **Focus**.
 
 ---
 
@@ -415,22 +413,10 @@ Package configuration defines:
 ### 14.4 Install behavior
 `make install`:
 1. builds the app bundle
-2. stops an already-running `Focus` process if one exists
+2. stops an already-running `Focus` process if one exists and records that it was running
 3. removes any existing `~/Applications/Focus.app`
 4. copies the newly built app bundle into `~/Applications/`
-
-Additional requirements:
-- removal uses `trash`, not `rm`
-- `make` with no target defaults to install behavior via `all: install`
-
-### 14.5 Release packaging
-`make release`:
-1. builds the app bundle
-2. finds the most recent git tag
-3. creates `.build/Focus-<tag>.zip`
-4. packages the `.app` bundle using `ditto -c -k --sequesterRsrc --keepParent`
-
-If no git tag exists, release packaging fails with an error.
+5. relaunches the installed app if step 2 stopped it
 
 ### 14.6 App icon
 The bundle uses:

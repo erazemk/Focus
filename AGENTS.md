@@ -17,12 +17,9 @@
 ## Build and Packaging
 - Build with `make build`.
 - Install locally with `make install`.
-- The underlying build command is:
-  - `swift build --package-path src --scratch-path .build -c release`
-- App bundle assembly output is:
-  - `.build/Focus.app`
-- Local install destination is:
-  - `~/Applications/Focus.app`
+- The underlying build command is: `swift build --package-path src --scratch-path .build -c release`
+- App bundle assembly output is: `.build/Focus.app`
+- Local install destination is: `~/Applications/Focus.app`
 
 ## Workflow Notes
 - Use terminal-based workflow only; do not rely on Xcode project files or Xcode UI.
